@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AYAN AHMED KALESHA // 3D VFX & Animation Portfolio</title>
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #05070c;
+            --primary-cyan: #00f0ff;
+            --primary-magenta: #ff0055;
+            --primary-emerald: #00ffaa;
+            --hud-bg: rgba(8, 12, 22, 0.85);
+            --hud-border: rgba(0, 240, 255, 0.25);
+            --font-title: 'Orbitron', sans-serif;
+            --font-body: 'Rajdhani', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-color);
+            font-family: var(--font-body);
+            color: #ffffff;
+        }
+
+        /* 3D Canvas Background */
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Cinematic Vignette & Scanline Overlay */
+        .viewport-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+            background: 
+                radial-gradient(circle at center, transparent 35%, rgba(2, 4, 10, 0.9) 100%),
+                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 100%, 100% 4px;
+        }
+
+        /* HUD Layer */
+        .ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 24px;
+        }
+
+        .interactive {
+            pointer-events: auto;
+        }
+
+        /* Engine Header Bar */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--hud-bg);
+            border: 1px solid var(--hud-border);
+            backdrop-filter: blur(12px);
+            padding: 14px 28px;
+            border-radius: 4px;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-logo {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary-cyan), var(--primary-magenta));
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulseGlow 3s infinite alternate;
+        }
+
+        @keyframes pulseGlow {
+            0% { filter: drop-shadow(0 0 4px var(--primary-cyan)); }
+            100% { filter: drop-shadow(0 0 12px var(--primary-magenta)); }
+        }
+
+        .brand-text h1 {
+            font-family: var(--font-title);
+            font-size: 1.15rem;
+            letter-spacing: 2px;
+            font-weight: 800;
+            background: linear-gradient(90deg, #fff, var(--primary-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-text span {
+            font-size: 0.72rem;
+            color: rgba(255, 255, 255, 0.6);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            list-style: none;
+        }
+
+        .nav-item {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-family: var(--font-title);
+            font-size: 0.78rem;
+            letter-spacing: 1px;
+            padding: 6px 12px;
+            border: 1px solid transparent;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            color: var(--primary-cyan);
+            border-color: var(--primary-cyan);
+            background: rgba(0, 240, 255, 0.1);
+            text-shadow: 0 0 8px var(--primary-cyan);
+        }
+
+        /* Portfolio Main Showcase Card */
+        .hero-container {
+            max-width: 580px;
+            background: var(--hud-bg);
+            border: 1px solid var(--hud-border);
+            border-left: 4px solid var(--primary-cyan);
+            backdrop-filter: blur(16px);
+            padding: 32px;
+            border-radius: 4px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            transition: all 0.3s ease;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 12px;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            font-family: var(--font-title);
+            font-size: 0.68rem;
+            color: var(--primary-cyan);
+            letter-spacing: 1.5px;
+            border-radius: 2px;
+            margin-bottom: 14px;
+        }
+
+        .hero-badge i {
+            font-size: 0.55rem;
+            color: var(--primary-emerald);
+        }
+
+        .hero-title {
+            font-family: var(--font-title);
+            font-size: 2.2rem;
+            line-height: 1.1;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .hero-title span {
+            color: var(--primary-cyan);
+            text-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+        }
+
+        .hero-subtitle {
+            font-size: 1.05rem;
+            color: var(--primary-emerald);
+            font-weight: 600;
+            margin-bottom: 16px;
+            letter-spacing: 1px;
+        }
+
+        .hero-desc {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.82);
+            line-height: 1.55;
+            margin-bottom: 22px;
+            font-weight: 500;
+        }
+
+        /* Tech Pills */
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .tech-pill {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            font-family: var(--font-title);
+            font-size: 0.68rem;
+            padding: 4px 10px;
+            color: rgba(255, 255, 255, 0.85);
+            border-radius: 2px;
+        }
+
+        .cta-group {
+            display: flex;
+            gap: 14px;
+        }
+
+        .btn {
+            font-family: var(--font-title);
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 12px 24px;
+            border: none;
+            cursor: pointer;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-cyan), #0088ff);
+            color: #000;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.7);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--primary-cyan);
+            color: var(--primary-cyan);
+        }
+
+        /* HUD Stats Dashboard */
+        .stats-panel {
+            position: absolute;
+            right: 24px;
+            top: 105px;
+            width: 240px;
+            background: var(--hud-bg);
+            border: 1px solid var(--hud-border);
+            backdrop-filter: blur(12px);
+            padding: 18px;
+            border-radius: 4px;
+            font-family: var(--font-title);
+        }
+
+        .panel-header {
+            font-size: 0.72rem;
+            color: var(--primary-cyan);
+            letter-spacing: 1.5px;
+            margin-bottom: 12px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.76rem;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .stat-value {
+            color: var(--primary-emerald);
+            font-weight: 600;
+        }
+
+        /* Interactive Controls Bar */
+        .controls-bar {
+            display: flex;
+            gap: 12px;
+            background: var(--hud-bg);
+            border: 1px solid var(--hud-border);
+            backdrop-filter: blur(12px);
+            padding: 12px 20px;
+            border-radius: 4px;
+            align-self: center;
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            padding: 8px 16px;
+            font-family: var(--font-title);
+            font-size: 0.72rem;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .control-btn:hover, .control-btn.active {
+            background: rgba(0, 240, 255, 0.15);
+            border-color: var(--primary-cyan);
+            color: var(--primary-cyan);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .stats-panel { display: none; }
+            .hero-container { max-width: 100%; padding: 20px; }
+            .hero-title { font-size: 1.7rem; }
+            .nav-links { display: none; }
+            .controls-bar { flex-wrap: wrap; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Three.js Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <!-- Vignette & Scanline Overlay -->
+    <div class="viewport-overlay"></div>
+
+    <!-- Engine User Interface Layer -->
+    <div class="ui-layer">
+        
+        <!-- Header HUD Navigation -->
+        <header class="interactive">
+            <div class="brand">
+                <div class="brand-logo">
+                    <i class="fa-solid fa-cube" style="font-size: 15px; color: #000;"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>AYAN AHMED KALESHA</h1>
+                    <span>VFX Compositor & 3D Specialist</span>
+                </div>
+            </div>
+            
+            <ul class="nav-links">
+                <li class="nav-item active" onclick="loadContent('overview')"><i class="fa-solid fa-layer-group"></i> OVERVIEW</li>
+                <li class="nav-item" onclick="loadContent('capstone')"><i class="fa-solid fa-film"></i> CAPSTONE FILM</li>
+                <li class="nav-item" onclick="loadContent('pipeline')"><i class="fa-solid fa-cube"></i> 3D PIPELINE</li>
+                <li class="nav-item" onclick="loadContent('business')"><i class="fa-solid fa-store"></i> ENTERPRISE</li>
+            </ul>
+        </header>
+
+        <!-- Dynamic Main Content Panel -->
+        <main class="hero-container interactive" id="hero-card">
+            <div class="hero-badge" id="card-badge">
+                <i class="fa-solid fa-circle"></i> PORTFOLIO ENGINE ACTIVE
+            </div>
+            <h2 class="hero-title" id="card-title">AYAN AHMED <span>KALESHA</span></h2>
+            <div class="hero-subtitle" id="card-subtitle">Digital Media & Animation Specialist | VFX Artist</div>
+            
+            <p class="hero-desc" id="card-desc">
+                Versatile Digital Media specialist experienced in end-to-end film production pipelines, video editing, green-screen keying, motion tracking, and 3D modeling in Blender and Maya.
+            </p>
+
+            <div class="tech-stack" id="card-tech">
+                <span class="tech-pill">Blender 3D</span>
+                <span class="tech-pill">Autodesk Maya</span>
+                <span class="tech-pill">After Effects</span>
+                <span class="tech-pill">Premiere Pro</span>
+                <span class="tech-pill">VFX Compositing</span>
+                <span class="tech-pill">Motion Tracking</span>
+            </div>
+
+            <div class="cta-group">
+                <button class="btn btn-primary" id="btn-interact">
+                    <i class="fa-solid fa-play"></i> TRIGGER PULSE
+                </button>
+                <button class="btn btn-secondary" id="btn-theme">
+                    <i class="fa-solid fa-palette"></i> SHADER PRESET
+                </button>
+            </div>
+        </main>
+
+        <!-- Real-Time Metrics Widget -->
+        <aside class="stats-panel interactive">
+            <div class="panel-header">
+                <span><i class="fa-solid fa-chart-line"></i> ENGINE METRICS</span>
+                <span style="color: var(--primary-emerald);">LIVE</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">FPS:</span>
+                <span class="stat-value" id="val-fps">60.0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">LOCATION:</span>
+                <span class="stat-value">Bengaluru, IN</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">DEGREE:</span>
+                <span class="stat-value">B.Voc (SJU)</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">3D ENGINES:</span>
+                <span class="stat-value">Eevee / Cycles</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">MOUSE X/Y:</span>
+                <span class="stat-value" id="val-mouse">0.00, 0.00</span>
+            </div>
+        </aside>
+
+        <!-- Interactive Control Bar -->
+        <footer class="controls-bar interactive">
+            <button class="control-btn active" id="toggle-wireframe">
+                <i class="fa-solid fa-border-all"></i> WIREFRAME
+            </button>
+            <button class="control-btn" id="toggle-particles">
+                <i class="fa-solid fa-atom"></i> PARTICLES
+            </button>
+            <button class="control-btn" id="toggle-rotation">
+                <i class="fa-solid fa-rotate"></i> AUTO ROTATE
+            </button>
+            <button class="control-btn" id="reset-cam">
+                <i class="fa-solid fa-video"></i> RECENTER CAM
+            </button>
+        </footer>
+
+    </div>
+
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        // --- 1. PORTFOLIO DATA (From Resume) ---
+        const portfolioData = {
+            overview: {
+                badge: "PORTFOLIO ENGINE ACTIVE",
+                title: "AYAN AHMED <span>KALESHA</span>",
+                subtitle: "Digital Media & Animation Specialist | VFX Artist",
+                desc: "Passionate specialist with a strong technical foundation in video production, VFX compositing, green-screen keying, motion tracking, and 3D modeling across Blender and Maya pipelines.",
+                tech: ["Blender 3D", "Autodesk Maya", "After Effects", "Premiere Pro", "VFX Compositing", "Green Screen Keying"]
+            },
+            capstone: {
+                badge: "FEATURED CAPSTONE FILM",
+                title: "KAREEN: <span>SHADOW SIBLING</span>",
+                subtitle: "Live-Action VFX Short Film (SJU Capstone Project)",
+                desc: "Spearheaded complete end-to-end production: scriptwriting, directing, videography, green-screen keying, camera motion tracking, 3D CGI integration, and audio mastering.",
+                tech: ["Live-Action VFX", "Green Screen", "3D CGI", "After Effects", "Motion Tracking", "Color Grading"]
+            },
+            pipeline: {
+                badge: "3D ASSET & ANIMATION WORKFLOW",
+                title: "3D & VFX <span>SHOWCASE</span>",
+                subtitle: "Blender (Eevee/Cycles) & Autodesk Maya",
+                desc: "Custom 3D character modeling, texturing, dynamic lighting alignment, and multi-pass rendering integrated into real-world footage for cinema-quality visual realism.",
+                tech: ["Eevee Engine", "Cycles Engine", "Maya Pipeline", "Multi-pass Render", "Lighting Alignment", "3D Texturing"]
+            },
+            business: {
+                badge: "COMMERCIAL & E-COMMERCE",
+                title: "E-COMMERCE <span>ENTERPRISE</span>",
+                subtitle: "Founder & Operations Manager (2024 – Present)",
+                desc: "Combines creative storytelling with commercial acumen: running a custom apparel enterprise, digital marketing strategies, custom printing quality control, and storefront ops.",
+                tech: ["Garment Printing", "E-Commerce Strategy", "Flipkart & Meesho Ops", "Google Business", "Digital Marketing"]
+            }
+        };
+
+        function loadContent(key) {
+            const data = portfolioData[key];
+            if (!data) return;
+
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            document.getElementById('card-badge').innerHTML = `<i class="fa-solid fa-circle"></i> ${data.badge}`;
+            document.getElementById('card-title').innerHTML = data.title;
+            document.getElementById('card-subtitle').innerText = data.subtitle;
+            document.getElementById('card-desc').innerText = data.desc;
+
+            const techContainer = document.getElementById('card-tech');
+            techContainer.innerHTML = data.tech.map(t => `<span class="tech-pill">${t}</span>`).join('');
+
+            // Pulse animation trigger on main core object
+            mainCore.scale.set(1.3, 1.3, 1.3);
+            setTimeout(() => mainCore.scale.set(1, 1, 1), 350);
+        }
+
+        // --- 2. THREE.JS SCENE SETUP ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x05070c, 0.025);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 2, 12);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.25;
+        container.appendChild(renderer.domElement);
+
+        // --- 3. DYNAMIC LIGHTING ---
+        const ambientLight = new THREE.AmbientLight(0x0a1020, 2.5);
+        scene.add(ambientLight);
+
+        // Dynamic PointLight following mouse
+        const mouseLight = new THREE.PointLight(0x00f0ff, 6, 25);
+        mouseLight.position.set(0, 0, 5);
+        scene.add(mouseLight);
+
+        // Accent Lights
+        const accentLight = new THREE.PointLight(0xff0055, 4, 30);
+        accentLight.position.set(-8, 5, -5);
+        scene.add(accentLight);
+
+        const gridLight = new THREE.PointLight(0x00ffaa, 3, 20);
+        gridLight.position.set(0, -4, 0);
+        scene.add(gridLight);
+
+        // --- 4. 3D OBJECTS & GEOMETRY ---
+        const worldGroup = new THREE.Group();
+        scene.add(worldGroup);
+
+        // Core Object: Icosahedron Wireframe
+        const coreGeo = new THREE.IcosahedronGeometry(2.2, 1);
+        const coreMat = new THREE.MeshStandardMaterial({
+            color: 0x081226,
+            roughness: 0.2,
+            metalness: 0.9,
+            wireframe: true,
+            emissive: 0x002b4d,
+            emissiveIntensity: 0.5
+        });
+        const mainCore = new THREE.Mesh(coreGeo, coreMat);
+        mainCore.position.set(3.2, 0.5, 0);
+        worldGroup.add(mainCore);
+
+        // Inner Crystal Node
+        const innerGeo = new THREE.OctahedronGeometry(1.2, 0);
+        const innerMat = new THREE.MeshBasicMaterial({
+            color: 0x00f0ff,
+            wireframe: true
+        });
+        const innerCrystal = new THREE.Mesh(innerGeo, innerMat);
+        mainCore.add(innerCrystal);
+
+        // Orbiting Torus Rings
+        const ringGeo = new THREE.TorusGeometry(3.6, 0.04, 16, 100);
+        const ringMat = new THREE.MeshStandardMaterial({
+            color: 0xff0055,
+            emissive: 0xff0055,
+            emissiveIntensity: 0.8,
+            roughness: 0.1
+        });
+        const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+        ringMesh.position.copy(mainCore.position);
+        ringMesh.rotation.x = Math.PI / 3;
+        worldGroup.add(ringMesh);
+
+        const ringMesh2 = new THREE.Mesh(
+            new THREE.TorusGeometry(4.2, 0.02, 16, 100),
+            new THREE.MeshBasicMaterial({ color: 0x00f0ff, wireframe: true })
+        );
+        ringMesh2.position.copy(mainCore.position);
+        ringMesh2.rotation.y = Math.PI / 4;
+        worldGroup.add(ringMesh2);
+
+        // Wave Displaced Terrain Grid
+        const gridGeo = new THREE.PlaneGeometry(80, 80, 50, 50);
+        const gridMat = new THREE.MeshStandardMaterial({
+            color: 0x001122,
+            wireframe: true,
+            emissive: 0x001a33,
+            emissiveIntensity: 0.4
+        });
+        const gridMesh = new THREE.Mesh(gridGeo, gridMat);
+        gridMesh.rotation.x = -Math.PI / 2;
+        gridMesh.position.y = -5;
+        worldGroup.add(gridMesh);
+
+        const posAttr = gridGeo.attributes.position;
+        for (let i = 0; i < posAttr.count; i++) {
+            const x = posAttr.getX(i);
+            const y = posAttr.getY(i);
+            const zDist = Math.sin(x * 0.2) * Math.cos(y * 0.2) * 1.2;
+            posAttr.setZ(i, zDist);
+        }
+        gridGeo.computeVertexNormals();
+
+        // Glowing Particle Field
+        const particleCount = 1200;
+        const particleGeo = new THREE.BufferGeometry();
+        const particlePos = new Float32Array(particleCount * 3);
+
+        for (let i = 0; i < particleCount * 3; i += 3) {
+            particlePos[i] = (Math.random() - 0.5) * 40;
+            particlePos[i + 1] = (Math.random() - 0.5) * 30;
+            particlePos[i + 2] = (Math.random() - 0.5) * 40;
+        }
+
+        particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePos, 3));
+
+        const particleMat = new THREE.PointsMaterial({
+            color: 0x00f0ff,
+            size: 0.08,
+            transparent: true,
+            opacity: 0.75,
+            blending: THREE.AdditiveBlending
+        });
+
+        const particleSystem = new THREE.Points(particleGeo, particleMat);
+        worldGroup.add(particleSystem);
+
+        // --- 5. MOUSE PARALLAX & RAYCASTING ---
+        let mouseX = 0, mouseY = 0;
+        let targetMouseX = 0, targetMouseY = 0;
+
+        const windowHalfX = window.innerWidth / 2;
+        const windowHalfY = window.innerHeight / 2;
+
+        const raycaster = new THREE.Raycaster();
+        const mouseVec = new THREE.Vector2();
+
+        document.addEventListener('mousemove', (e) => {
+            targetMouseX = (e.clientX - windowHalfX) / windowHalfX;
+            targetMouseY = (e.clientY - windowHalfY) / windowHalfY;
+
+            mouseVec.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouseVec.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+            document.getElementById('val-mouse').innerText = `${targetMouseX.toFixed(2)}, ${targetMouseY.toFixed(2)}`;
+        });
+
+        // --- 6. SHADER & THEME CONTROLS ---
+        let autoRotate = true;
+        let currentThemeIndex = 0;
+
+        const themes = [
+            { primary: 0x00f0ff, secondary: 0xff0055 },
+            { primary: 0x00ffaa, secondary: 0x0088ff },
+            { primary: 0xffa500, secondary: 0xff00ff },
+            { primary: 0xffffff, secondary: 0x00f0ff }
+        ];
+
+        document.getElementById('btn-theme').addEventListener('click', () => {
+            currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+            const theme = themes[currentThemeIndex];
+            
+            mouseLight.color.setHex(theme.primary);
+            ringMat.color.setHex(theme.secondary);
+            ringMat.emissive.setHex(theme.secondary);
+            particleMat.color.setHex(theme.primary);
+            
+            document.documentElement.style.setProperty('--primary-cyan', `#${theme.primary.toString(16).padStart(6, '0')}`);
+            document.documentElement.style.setProperty('--primary-magenta', `#${theme.secondary.toString(16).padStart(6, '0')}`);
+        });
+
+        document.getElementById('toggle-wireframe').addEventListener('click', function() {
+            coreMat.wireframe = !coreMat.wireframe;
+            gridMat.wireframe = !gridMat.wireframe;
+            this.classList.toggle('active');
+        });
+
+        document.getElementById('toggle-particles').addEventListener('click', function() {
+            particleSystem.visible = !particleSystem.visible;
+            this.classList.toggle('active');
+        });
+
+        document.getElementById('toggle-rotation').addEventListener('click', function() {
+            autoRotate = !autoRotate;
+            this.classList.toggle('active');
+        });
+
+        document.getElementById('reset-cam').addEventListener('click', () => {
+            targetMouseX = 0;
+            targetMouseY = 0;
+        });
+
+        document.getElementById('btn-interact').addEventListener('click', () => {
+            mainCore.scale.set(1.4, 1.4, 1.4);
+            setTimeout(() => mainCore.scale.set(1, 1, 1), 400);
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // --- 7. ANIMATION LOOP ---
+        let lastTime = performance.now();
+        let frameCount = 0;
+        const fpsElement = document.getElementById('val-fps');
+
+        function animate(timestamp) {
+            requestAnimationFrame(animate);
+
+            // Calculate FPS
+            frameCount++;
+            if (timestamp > lastTime + 1000) {
+                fpsElement.innerText = (frameCount * 1000 / (timestamp - lastTime)).toFixed(1);
+                frameCount = 0;
+                lastTime = timestamp;
+            }
+
+            // Smooth Interpolation for Mouse Parallax
+            mouseX += (targetMouseX - mouseX) * 0.05;
+            mouseY += (targetMouseY - mouseY) * 0.05;
+
+            camera.position.x = mouseX * 2.5;
+            camera.position.y = 2 - mouseY * 2.0;
+            camera.lookAt(0, 0, 0);
+
+            mouseLight.position.x = mouseX * 8;
+            mouseLight.position.y = -mouseY * 6 + 2;
+
+            // Auto Rotation
+            if (autoRotate) {
+                mainCore.rotation.y += 0.008;
+                mainCore.rotation.x += 0.004;
+                innerCrystal.rotation.y -= 0.015;
+                ringMesh.rotation.z += 0.006;
+                ringMesh2.rotation.x += 0.005;
+                particleSystem.rotation.y += 0.0008;
+            }
+
+            // Raycaster Interaction
+            raycaster.setFromCamera(mouseVec, camera);
+            const intersects = raycaster.intersectObject(mainCore);
+
+            if (intersects.length > 0) {
+                mainCore.rotation.y += 0.02;
+                innerMat.color.setHex(0xff0055);
+            } else {
+                innerMat.color.setHex(0x00f0ff);
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        animate(performance.now());
+    </script>
+</body>
+</html>
